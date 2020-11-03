@@ -1,0 +1,48 @@
+#!/bin/bash
+# This is a modified version of the original archer optfile. It should work on the archer2-4c system.
+# Archer2 is the replacement of the UK national supercomputer Archer.
+# To be used with the default compilers.
+
+# Requires the following modules:
+# module load libfabric/1.11.0.0.233
+
+# For mpi:
+# module load cray-mpich/8.0.16
+
+# For netcdf:
+# module load cray-hdf5-parallel/1.12.0.2
+# module load cray-netcdf-hdf5parallel/4.7.4.2
+
+CC='cc'
+FC='ftn'
+F90C='ftn'
+
+DEFINES='-DWORDLENGTH=4 -D_BYTESWAPIO -DHAVE_LAPACK'
+CPP='cpp -traditional -P'
+EXTENDED_SRC_FLAG='-Mextend'
+GET_FC_VERSION="-V"
+CHECK_FOR_LAPACK=t
+FC_CHECK=f
+
+INCLUDES='-I/opt/cray/pe/netcdf-hdf5parallel/4.7.4.2/crayclang/9.1/include -I/opt/cray/pe/mpich/8.0.16/ucx/cray/9.1/include'
+LIBS='-L/opt/cray/pe/netcdf-hdf5parallel/4.7.4.2/crayclang/9.1/lib -L/opt/cray/pe/mpich/8.0.16/ucx/cray/9.1/lib'
+
+NOOPTFLAGS='-O0'
+NOOPTFILES=''
+
+if test "x$IEEE" = x ; then   #- with optimisation:
+#   FOPTIM='-O2 -hfp3 -Oipa5' for less agressive optimization
+#   Be aware not all experiments pass the restart test with optimization
+    FOPTIM='-O3 -hfp3 -Oipa5'
+else
+    if test "x$DEVEL" = x ; then  #- no optimisation + IEEE :
+      FOPTIM='-O0 -hfp0'
+    else                          #- development/check options:
+      FOPTIM='-O0 -hfp0'
+      FOPTIM="$FOPTIM -g -Rbc -rm -hmsgs -hnegmsgs"
+    fi
+fi
+
+#- For big executable, this could help:
+#FFLAGS='-h pic -dynamic'
+#CFLAGS='-h pic -dynamic'
